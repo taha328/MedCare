@@ -1,9 +1,12 @@
-package com.example.medcare;
+package com.example.medcare.admin;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+
+import com.example.medcare.R;
+import com.example.medcare.auth.SignInActivity;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class PendingVerificationActivity extends AppCompatActivity {

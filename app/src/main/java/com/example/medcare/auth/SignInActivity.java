@@ -1,4 +1,4 @@
-package com.example.medcare;
+package com.example.medcare.auth;
 
 import androidx.appcompat.app.AppCompatActivity; // Correct non-deprecated import
 import android.content.Intent;
@@ -11,7 +11,11 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.google.android.gms.tasks.Task; // Ensure Task is imported if needed by listeners
+
+import com.example.medcare.admin.AdminDashboardActivity;
+import com.example.medcare.MainActivity;
+import com.example.medcare.admin.PendingVerificationActivity;
+import com.example.medcare.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;

@@ -1,53 +1,57 @@
 package com.example.medcare;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Button; // Import Button
-import android.widget.TextView; // Import TextView
-import android.widget.Toast; // Import Toast
+import android.widget.FrameLayout;
+import android.widget.Toast;
+
+import com.example.medcare.admin.AdminDashboardActivity;
+import com.example.medcare.admin.PendingVerificationActivity;
+import com.example.medcare.auth.SignInActivity;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-// Import Firestore classes
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import com.example.medcare.ui.DisponibiliteFragment;
+import com.example.medcare.ui.EtablissementFragment;
+import com.example.medcare.ui.FileAttenteFragment;
+
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity"; // Tag for logging
+    private static final String TAG = "MainActivity";
     private FirebaseAuth mAuth;
-    private FirebaseFirestore db; // Firestore instance needed here
+    private FirebaseFirestore db;
 
-    // Declare UI elements used in this activity's layout (activity_dashboard_main.xml)
-    private TextView textViewWelcomeMain;
-    private Button buttonLogoutMain;
+    private BottomNavigationView bottomNavigationView;
+    private FrameLayout fragmentContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Ensure this inflates your combined dashboard layout
-        setContentView(R.layout.activity_dashboard_main);
+        setContentView(R.layout.activity_main);
 
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance(); // Initialize Firestore
+        db = FirebaseFirestore.getInstance();
 
-        // Find the UI elements from the layout
-        textViewWelcomeMain = findViewById(R.id.textViewWelcomeMain);
-        buttonLogoutMain = findViewById(R.id.buttonLogoutMain);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        fragmentContainer = findViewById(R.id.fragment_container);
 
-        // Setup the logout button listener
-        if (buttonLogoutMain != null) {
-            buttonLogoutMain.setOnClickListener(v -> {
-                Log.d(TAG, "Logout button clicked.");
-                mAuth.signOut();
-                redirectToSignIn(); // Go back to login screen
-            });
-        } else {
-            Log.e(TAG, "Logout button (buttonLogoutMain) not found in layout!");
+        if (bottomNavigationView == null || fragmentContainer == null) {
+            Log.e(TAG, "FATAL: Core UI elements (BottomNav or FragmentContainer) not found in layout activity_main.xml!");
+            Toast.makeText(this, "Error loading main UI.", Toast.LENGTH_LONG).show();
+            if (mAuth.getCurrentUser() != null) mAuth.signOut();
+            redirectToSignIn();
+            return;
         }
     }
 
@@ -56,27 +60,21 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
-            // Not signed in, go to Sign In screen
-            Log.d(TAG, "User not signed in. Redirecting to SignInActivity.");
             redirectToSignIn();
         } else {
-            // User IS signed in. Verify their role/status allows them here.
-            Log.d(TAG, "User signed in (" + currentUser.getUid() + "). Verifying access...");
-            verifyUserAccessAndLoadUI(currentUser.getUid());
+            verifyUserAccessAndSetupUI(currentUser.getUid());
         }
     }
 
-    // Helper method to navigate to SignInActivity and finish the current one
     private void redirectToSignIn() {
         Intent intent = new Intent(MainActivity.this, SignInActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-        finish(); // Finish MainActivity
+        finish();
     }
 
-    // Checks Firestore for the user's role and status, then either redirects or loads UI
     @SuppressLint("SetTextI18n")
-    private void verifyUserAccessAndLoadUI(String userId) {
+    private void verifyUserAccessAndSetupUI(String userId) {
         DocumentReference userRef = db.collection("users").document(userId);
         userRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
@@ -85,71 +83,98 @@ public class MainActivity extends AppCompatActivity {
                 String userStatus = document.getString("status");
                 Log.d(TAG, "Verification check: role=" + userRole + ", status=" + userStatus);
 
-                boolean stayInMainActivity = false;
-                Intent redirectIntent = null; // Intent for redirection if needed
+                boolean showBottomNavUI = false;
+                Intent redirectIntent = null;
 
-                // Determine routing based on role and status
                 if ("admin".equals(userRole)) {
-                    Log.d(TAG, "User is Admin. Redirecting...");
                     redirectIntent = new Intent(MainActivity.this, AdminDashboardActivity.class);
                 } else if ("professional".equals(userRole) && "approved".equals(userStatus)) {
-                    Log.d(TAG, "User is Approved Professional. Staying in MainActivity.");
-                    stayInMainActivity = true; // Approved professionals stay
+                    showBottomNavUI = true;
                 } else if ("pending_professional".equals(userRole)) {
                     if ("pending".equals(userStatus)) {
-                        Log.d(TAG, "User is Pending Professional. Redirecting...");
                         redirectIntent = new Intent(MainActivity.this, PendingVerificationActivity.class);
                     } else if ("rejected".equals(userStatus)) {
-                        Log.w(TAG, "Rejected professional attempting access. Signing out.");
+                        Log.w(TAG, "Rejected professional attempted access. Signing out.");
                         Toast.makeText(this, "Your professional application was rejected.", Toast.LENGTH_LONG).show();
                         mAuth.signOut();
-                        redirectToSignIn(); // Redirect after logging out
-                        return; // Stop processing here
+                        redirectToSignIn();
+                        return;
                     } else {
-                        // Unexpected status for pending_professional
-                        stayInMainActivity = false; // Don't allow stay
+                        Log.e(TAG,"Unhandled status '"+userStatus+"' for pending_professional. Signing out.");
+                        Toast.makeText(this, "Account status error.", Toast.LENGTH_LONG).show();
+                        mAuth.signOut();
+                        redirectToSignIn();
+                        return;
                     }
                 } else if ("patient".equals(userRole)) {
-                    Log.d(TAG, "User is Patient. Staying in MainActivity.");
-                    stayInMainActivity = true; // Patients stay
+                    showBottomNavUI = true;
                 }
 
-                // Execute action based on determination
-                if (stayInMainActivity) {
-                    // User is allowed here, load the UI elements for them
-                    FirebaseUser currentUser = mAuth.getCurrentUser(); // Re-get current user info
-                    if (currentUser != null && textViewWelcomeMain != null) {
-                        String email = currentUser.getEmail();
-                        // Set welcome text, potentially indicating role for clarity during testing
-                        textViewWelcomeMain.setText("Welcome, " + (email != null ? email : "User") + "!\n(Role: " + userRole + ")");
-                    }
-                    // ** Add code here later to show/hide specific UI elements based on userRole if needed **
-
+                if (showBottomNavUI) {
+                    Log.d(TAG,"Setting up Bottom Navigation for role: " + userRole);
+                    setupBottomNavigation();
                 } else if (redirectIntent != null) {
-                    // Redirect to the determined Activity (Admin or Pending)
                     Log.d(TAG, "Redirecting signed-in user to: " + redirectIntent.getComponent().getShortClassName());
                     redirectIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(redirectIntent);
-                    finish(); // Finish MainActivity AFTER starting the new one
+                    finish();
                 } else {
-                    // Fell through - Unhandled role/status combination
-                    Log.e(TAG, "Access Denied or Unhandled State for role: " + userRole + ", status: " + userStatus + ". Signing out.");
-                    Toast.makeText(this, "Account access error. Please contact support.", Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "Access Denied/Unhandled State for role=" + userRole + ", status=" + userStatus + ". Signing out.");
+                    Toast.makeText(this, "Account access error.", Toast.LENGTH_LONG).show();
                     mAuth.signOut();
                     redirectToSignIn();
                 }
 
             } else {
-                // Error fetching Firestore document OR document doesn't exist
-                if(task.getException() != null){
-                    Log.e(TAG, "Firestore get failed for user: " + userId, task.getException());
-                } else {
-                    Log.e(TAG, "Firestore profile not found for authenticated user: " + userId + ". Possible data inconsistency.");
-                }
-                Toast.makeText(this, "Error loading your profile. Please log in again.", Toast.LENGTH_LONG).show();
+                Log.e(TAG, "Firestore get failed or user doc not found for UID: " + userId, task.getException());
+                Toast.makeText(this, "Error loading profile. Please log in again.", Toast.LENGTH_LONG).show();
                 mAuth.signOut();
                 redirectToSignIn();
             }
         });
+    }
+
+    private void setupBottomNavigation() {
+        if (bottomNavigationView == null) return;
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            Fragment selectedFragment = null;
+
+            if (id == R.id.nav_etablissement) {
+                selectedFragment = new EtablissementFragment();
+            } else if (id == R.id.nav_disponibilite) {
+                selectedFragment = new DisponibiliteFragment();
+            } else if (id == R.id.nav_file) {
+                selectedFragment = new FileAttenteFragment();
+            }
+
+            if (selectedFragment != null) {
+                replaceFragment(selectedFragment);
+                return true;
+            }
+            return false;
+        });
+
+        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) == null) {
+            Log.d(TAG,"Setting initial fragment (EtablissementFragment)");
+            if(bottomNavigationView.getMenu().findItem(R.id.nav_etablissement) != null) {
+                bottomNavigationView.setSelectedItemId(R.id.nav_etablissement);
+            } else {
+                Log.e(TAG,"Default menu item R.id.nav_etablissement not found!");
+            }
+        }
+    }
+
+    private void replaceFragment(Fragment fragment) {
+        if (fragmentContainer == null || fragment == null) {
+            Log.e(TAG,"Cannot replace fragment - container or fragment is null!");
+            return;
+        }
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment);
+        transaction.commit();
+        Log.d(TAG,"Replacing fragment with: " + fragment.getClass().getSimpleName());
     }
 }

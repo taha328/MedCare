@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Sélection de l'établissement -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Établissement"
+            android:textStyle="bold" />
+        <Spinner
+            android:id="@+id/spinner_etab_file"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Formulaire d'ajout client -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nom"
+            android:textStyle="bold" />
+        <EditText
+            android:id="@+id/input_nom_client"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nom du client" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Prénom"
+            android:textStyle="bold" />
+        <EditText
+            android:id="@+id/input_prenom_client"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Prénom du client" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Heure d’arrivée"
+            android:textStyle="bold" />
+        <EditText
+            android:id="@+id/input_heure_arrivee"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ex: 10:30" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Motif"
+            android:textStyle="bold" />
+        <EditText
+            android:id="@+id/input_motif"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Motif de la visite" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Statut"
+            android:textStyle="bold" />
+        <EditText
+            android:id="@+id/input_statut"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="En attente, Pris en charge..." />
+
+        <Button
+            android:id="@+id/btn_ajouter_client"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ajouter à la file" />
+
+        <!-- Liste des clients dans la file -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="File d'attente"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <LinearLayout
+            android:id="@+id/liste_file_attente"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="8dp" />
+
+    </LinearLayout>
+</ScrollView>

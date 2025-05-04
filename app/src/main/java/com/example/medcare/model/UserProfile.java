@@ -1,10 +1,9 @@
-package com.example.medcare;
+package com.example.medcare.model;
 
 
 import com.google.firebase.firestore.IgnoreExtraProperties;
-import com.google.firebase.firestore.ServerTimestamp; // Import ServerTimestamp
-import java.util.Date; // Import Date
-
+import com.google.firebase.firestore.ServerTimestamp;
+import java.util.Date;
 
 @IgnoreExtraProperties
 public class UserProfile {
@@ -23,8 +22,7 @@ public class UserProfile {
 
     // --- Required: Public no-argument constructor for Firestore ---
     public UserProfile() {
-        // Default constructor required for calls to DataSnapshot.getValue(UserProfile.class)
-        // and for Firestore's automatic data mapping (toObject).
+
     }
 
     // --- Getters (Required by Firestore for mapping data FROM Firestore) ---

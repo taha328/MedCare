@@ -1,6 +1,5 @@
-package com.example.medcare;
+package com.example.medcare.admin;
 
-import androidx.annotation.NonNull; // Keep this annotation import if used elsewhere, though not strictly needed in this simplified version
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,10 +16,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.medcare.R;
+import com.example.medcare.model.UserProfile;
+import com.example.medcare.auth.SignInActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.WriteBatch; // Import WriteBatch
 
 import java.util.ArrayList;
 import java.util.HashMap; // Import HashMap

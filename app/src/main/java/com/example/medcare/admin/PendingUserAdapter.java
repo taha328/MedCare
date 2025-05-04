@@ -1,4 +1,4 @@
-package com.example.medcare;
+package com.example.medcare.admin;
 
 
 import android.annotation.SuppressLint;
@@ -9,6 +9,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.medcare.R;
+import com.example.medcare.model.UserProfile;
+
 import java.util.List;
 
 public class PendingUserAdapter extends RecyclerView.Adapter<PendingUserAdapter.UserViewHolder> {
@@ -49,7 +53,7 @@ public class PendingUserAdapter extends RecyclerView.Adapter<PendingUserAdapter.
     // Method to update the list if needed (e.g., for live updates)
     public void setUserList(List<UserProfile> newUserList) {
         this.userList = newUserList;
-        notifyDataSetChanged(); // Consider using DiffUtil for better performance
+        notifyDataSetChanged();
     }
 
     // ViewHolder class

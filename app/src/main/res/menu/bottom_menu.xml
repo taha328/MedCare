@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_etablissement"
+        android:title="Établissement"
+        android:icon="@drawable/home"/>
+    <item
+        android:id="@+id/nav_disponibilite"
+        android:title="Disponibilité"
+        android:icon="@drawable/calendar"/>
+    <item
+        android:id="@+id/nav_file"
+        android:title="File d'attente"
+        android:icon="@drawable/queue"/>
+</menu>

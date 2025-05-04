@@ -32,11 +32,11 @@
         </activity>
 
         <!-- DECLARE ALL OTHER ACTIVITIES HERE -->
-        <activity android:name=".SignInActivity" android:exported="false" />
-        <activity android:name=".SignUpProfessionalActivity" android:exported="false" />
-        <activity android:name=".PendingVerificationActivity" android:exported="false" />
-        <activity android:name=".AdminDashboardActivity" android:exported="false" />
-         <activity android:name=".SignUpPatientActivity" android:exported="false" />
+        <activity android:name=".auth.SignInActivity" android:exported="false" />
+        <activity android:name=".auth.SignUpProfessionalActivity" android:exported="false" />
+        <activity android:name=".admin.PendingVerificationActivity" android:exported="false" />
+        <activity android:name=".admin.AdminDashboardActivity" android:exported="false" />
+         <activity android:name=".auth.SignUpPatientActivity" android:exported="false" />
         <!-- Add any future activities here as well -->
 
     </application>
