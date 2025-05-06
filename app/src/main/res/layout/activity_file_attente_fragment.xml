@@ -96,6 +96,14 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingTop="8dp" />
+        <!-- Add this ProgressBar, adjust layout constraints/positioning -->
+        <ProgressBar
+            android:id="@+id/loading_indicator_file"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
 
     </LinearLayout>
 </ScrollView>

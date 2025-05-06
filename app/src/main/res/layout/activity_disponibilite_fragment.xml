@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true"> <!-- Helps if content is smaller than screen -->
 
     <LinearLayout
         android:padding="16dp"
@@ -9,40 +10,93 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Spinner for selecting Establishment -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Établissement :"
+            android:labelFor="@id/spinner_etab"/> <!-- Accessibility -->
         <Spinner
             android:id="@+id/spinner_etab"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:minHeight="48dp" /> <!-- Material Design minimum height -->
 
+        <!-- Removed EditText for Jour -->
+        <!--
         <EditText
             android:id="@+id/input_jour"
             android:hint="Jour (ex : Lundi)"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
+         -->
 
+        <!-- Added Spinner for selecting Day -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Jour de la semaine :"
+            android:labelFor="@id/spinner_jour"/>
+        <Spinner
+            android:id="@+id/spinner_jour"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp" />
+
+        <!-- EditText for Start Time -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Heure début :"
+            android:labelFor="@id/input_debut"/>
         <EditText
             android:id="@+id/input_debut"
-            android:hint="Heure début (ex : 08:00)"
+            android:hint="HH:mm (ex: 08:00)"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:inputType="time"
+            android:maxLength="5"/>
 
+        <!-- EditText for End Time -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Heure fin :"
+            android:labelFor="@id/input_fin"/>
         <EditText
             android:id="@+id/input_fin"
-            android:hint="Heure fin (ex : 17:00)"
+            android:hint="HH:mm (ex: 17:00)"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:inputType="time"
+            android:maxLength="5"/>
+
+        <!-- Add a CheckBox/Switch for Open/Closed Status -->
+        <CheckBox
+            android:id="@+id/checkbox_ouvert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Ouvert ce jour-là"
+            android:checked="true"/> <!-- Default to open -->
 
         <Button
             android:id="@+id/btn_ajouter_dispo"
-            android:text="Ajouter"
-            android:layout_marginTop="12dp"
-            android:layout_width="match_parent"
+            android:text="Enregistrer Disponibilité"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:layout_height="wrap_content"/>
 
         <TextView
-            android:text="Disponibilités :"
+            android:text="Disponibilités enregistrées :"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:textStyle="bold"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
@@ -51,5 +105,16 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
+
+        <!-- Added ProgressBar -->
+        <ProgressBar
+            android:id="@+id/loading_indicator_dispo"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone" /> <!-- Keep initially hidden -->
+
     </LinearLayout>
 </ScrollView>

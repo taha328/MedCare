@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MedCare</string>
+    <string name="app_name">medcare</string>
 
     <!-- Sign In/Up General -->
     <string name="sign_in">Sign In</string>
@@ -9,14 +9,14 @@
     <string name="enter_your_email">Enter your email</string>
     <string name="enter_your_password">Enter your password</string>
     <string name="forgot_password">Forgot password?</string>
-    <string name="don_t_have_an_account_space">Don\'t have an account? </string> <!-- Note escaped apostrophe -->
+    <string name="don_t_have_an_account_space">Dont have an account? </string>
 
     <!-- Professional Sign Up Specific -->
     <string name="professional_sign_up">Professional Sign Up</string>
     <string name="enter_your_name">Enter your name</string>
     <string name="license_number">License Number</string>
     <string name="specialty">Specialty</string>
-    <string name="sign_up_button_description">Sign up as professional</string> <!-- Accessibility description -->
+    <string name="sign_up_button_description">Sign up as professional</string>
 
     <!-- Pending Verification Screen -->
     <string name="verification_pending">Your account is pending verification by an administrator.</string>
@@ -26,10 +26,9 @@
     <string name="approve">Approve</string>
     <string name="reject">Reject</string>
     <string name="error_fetching_data">Error fetching data</string>
-    <string name="patient_sign_up">patient_sign_up</string>
+    <string name="patient_sign_up">Patient Sign Up</string>
     <string name="sign_up_as_patient">Sign up as Patient</string>
     <string name="sign_up_as_professional">Sign up as Professional</string>
     <string name="need_an_account">Need an account?</string>
     <string name="welcome_placeholder">Welcome!</string>
-
 </resources>

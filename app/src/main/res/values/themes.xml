@@ -1,9 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.MedCare" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.medcare" parent="Theme.Material3.DayNight"> <!-- CHANGED HERE: Removed .NoActionBar -->
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- You might want to explicitly set colors now -->
+        <item name="colorPrimary">@color/purple_500</item> <!-- Example Color -->
+        <item name="colorPrimaryVariant">@color/purple_700</item> <!-- Example Color -->
+        <item name="colorOnPrimary">@color/white</item> <!-- Example Color -->
+        <!-- Add other color/style customizations as needed -->
     </style>
 
-    <style name="Theme.MedCare" parent="Base.Theme.MedCare" />
+    <style name="Theme.medcare" parent="Base.Theme.medcare" />
 </resources>

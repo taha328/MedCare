@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Title for the booking action -->
+    <item
+        android:id="@+id/nav_book_appointment"
+        android:enabled="true"
+        android:icon="@drawable/ic_book_online"
+        android:title="Prendre RDV" />
+
+    <!-- Title for viewing booked appointments -->
+    <item
+        android:id="@+id/nav_my_appointments"
+        android:enabled="true"
+        android:icon="@drawable/ic_event"
+        android:title="Mes RDV" />
+
+</menu>

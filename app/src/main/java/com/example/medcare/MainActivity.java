@@ -1,5 +1,6 @@
 package com.example.medcare;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -9,12 +10,17 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.example.medcare.admin.AdminDashboardActivity;
 import com.example.medcare.admin.PendingVerificationActivity;
 import com.example.medcare.auth.SignInActivity;
+import com.example.medcare.ui.PatientAppointmentsFragment;
+import com.example.medcare.ui.PatientEstablishmentListFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -34,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNavigationView;
     private FrameLayout fragmentContainer;
+    private String currentUserRole = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,10 +55,8 @@ public class MainActivity extends AppCompatActivity {
         fragmentContainer = findViewById(R.id.fragment_container);
 
         if (bottomNavigationView == null || fragmentContainer == null) {
-            Log.e(TAG, "FATAL: Core UI elements (BottomNav or FragmentContainer) not found in layout activity_main.xml!");
-            Toast.makeText(this, "Error loading main UI.", Toast.LENGTH_LONG).show();
-            if (mAuth.getCurrentUser() != null) mAuth.signOut();
-            redirectToSignIn();
+            Log.e(TAG, "FATAL: Core UI elements not found!");
+            handleFatalError();
             return;
         }
     }
@@ -73,6 +79,13 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+    private void handleFatalError() {
+        Toast.makeText(this, "Erreur critique de l'interface.", Toast.LENGTH_LONG).show();
+        if (mAuth != null && mAuth.getCurrentUser() != null) mAuth.signOut();
+        redirectToSignIn();
+    }
+
+
     @SuppressLint("SetTextI18n")
     private void verifyUserAccessAndSetupUI(String userId) {
         DocumentReference userRef = db.collection("users").document(userId);
@@ -81,100 +94,167 @@ public class MainActivity extends AppCompatActivity {
                 DocumentSnapshot document = task.getResult();
                 String userRole = document.getString("role");
                 String userStatus = document.getString("status");
-                Log.d(TAG, "Verification check: role=" + userRole + ", status=" + userStatus);
+                this.currentUserRole = userRole;
 
-                boolean showBottomNavUI = false;
+                boolean showMainUI = false;
                 Intent redirectIntent = null;
+
+                Log.d(TAG, "Role check: userRole = " + userRole);
 
                 if ("admin".equals(userRole)) {
                     redirectIntent = new Intent(MainActivity.this, AdminDashboardActivity.class);
                 } else if ("professional".equals(userRole) && "approved".equals(userStatus)) {
-                    showBottomNavUI = true;
+                    showMainUI = true;
                 } else if ("pending_professional".equals(userRole)) {
                     if ("pending".equals(userStatus)) {
                         redirectIntent = new Intent(MainActivity.this, PendingVerificationActivity.class);
-                    } else if ("rejected".equals(userStatus)) {
-                        Log.w(TAG, "Rejected professional attempted access. Signing out.");
-                        Toast.makeText(this, "Your professional application was rejected.", Toast.LENGTH_LONG).show();
-                        mAuth.signOut();
-                        redirectToSignIn();
-                        return;
                     } else {
-                        Log.e(TAG,"Unhandled status '"+userStatus+"' for pending_professional. Signing out.");
-                        Toast.makeText(this, "Account status error.", Toast.LENGTH_LONG).show();
-                        mAuth.signOut();
-                        redirectToSignIn();
+                        handleInvalidAccess("rejected".equals(userStatus) ? "Your professional application was rejected." : "Account status error.");
                         return;
                     }
                 } else if ("patient".equals(userRole)) {
-                    showBottomNavUI = true;
+                    showMainUI = true;
                 }
 
-                if (showBottomNavUI) {
-                    Log.d(TAG,"Setting up Bottom Navigation for role: " + userRole);
-                    setupBottomNavigation();
+                if (showMainUI) {
+                    Log.d(TAG, "Setting up Main UI for role: " + this.currentUserRole);
+                    setupBottomNavigationForRole();
                 } else if (redirectIntent != null) {
-                    Log.d(TAG, "Redirecting signed-in user to: " + redirectIntent.getComponent().getShortClassName());
+                    Log.d(TAG, "Redirecting to: " + redirectIntent.getComponent().getShortClassName());
                     redirectIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(redirectIntent);
                     finish();
                 } else {
-                    Log.e(TAG, "Access Denied/Unhandled State for role=" + userRole + ", status=" + userStatus + ". Signing out.");
-                    Toast.makeText(this, "Account access error.", Toast.LENGTH_LONG).show();
-                    mAuth.signOut();
-                    redirectToSignIn();
+                    handleInvalidAccess("Account access error or unhandled state.");
                 }
-
             } else {
-                Log.e(TAG, "Firestore get failed or user doc not found for UID: " + userId, task.getException());
-                Toast.makeText(this, "Error loading profile. Please log in again.", Toast.LENGTH_LONG).show();
-                mAuth.signOut();
-                redirectToSignIn();
+                Log.e(TAG, "Firestore profile check failed.", task.getException());
+                handleInvalidAccess("Error loading profile. Please log in again.");
             }
         });
     }
 
-    private void setupBottomNavigation() {
-        if (bottomNavigationView == null) return;
+    private void handleInvalidAccess(String toastMessage){
+        Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show();
+        if (mAuth != null) mAuth.signOut();
+        redirectToSignIn();
+    }
 
+    @SuppressLint("ResourceType") // Supress check for dynamic menu inflation
+    private void setupBottomNavigationForRole() {
+        if (bottomNavigationView == null || currentUserRole == null) return;
+
+        bottomNavigationView.getMenu().clear();
+        int menuResId;
+        int initialFragmentId;
+
+        Log.d(TAG, "Inflating menu for role: " + currentUserRole);
+
+        try {
+            if ("professional".equals(currentUserRole)) {
+                menuResId = R.menu.bottom_menu; // Make sure this file exists
+                initialFragmentId = R.id.nav_etablissement;    // Make sure this ID exists
+                bottomNavigationView.inflateMenu(menuResId);
+                setupNavigationListenerProfessional();
+            } else if ("patient".equals(currentUserRole)) {
+                menuResId = R.menu.bottom_nav_menu_patient;     // Make sure this file exists
+                initialFragmentId = R.id.nav_book_appointment;  // Make sure this ID exists
+                bottomNavigationView.inflateMenu(menuResId);
+                setupNavigationListenerPatient();
+            } else {
+                Log.e(TAG, "Unsupported role for bottom nav: " + currentUserRole);
+                bottomNavigationView.setVisibility(View.GONE);
+                return;
+            }
+        } catch (Exception e) { // Catch general exception during resource loading
+            Log.e(TAG, "Error inflating menu resource!", e);
+            Toast.makeText(this, "Erreur de chargement du menu.", Toast.LENGTH_LONG).show();
+            bottomNavigationView.setVisibility(View.GONE);
+            replaceFragment(new Fragment()); // Load empty fragment on error
+            return;
+        }
+
+        bottomNavigationView.setVisibility(View.VISIBLE);
+
+        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) == null) {
+            Log.d(TAG,"Setting initial fragment ID: " + initialFragmentId);
+            if (bottomNavigationView.getMenu().findItem(initialFragmentId) != null) {
+                bottomNavigationView.setSelectedItemId(initialFragmentId);
+            } else {
+                Log.e(TAG,"Default menu item ID " + initialFragmentId + " not found in inflated menu!");
+                loadFallbackFragment();
+            }
+        }
+    }
+
+    private void setupNavigationListenerProfessional() {
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             Fragment selectedFragment = null;
-
-            if (id == R.id.nav_etablissement) {
-                selectedFragment = new EtablissementFragment();
-            } else if (id == R.id.nav_disponibilite) {
-                selectedFragment = new DisponibiliteFragment();
-            } else if (id == R.id.nav_file) {
-                selectedFragment = new FileAttenteFragment();
-            }
-
-            if (selectedFragment != null) {
-                replaceFragment(selectedFragment);
-                return true;
-            }
-            return false;
+            if (id == R.id.nav_etablissement) selectedFragment = new EtablissementFragment();
+            else if (id == R.id.nav_disponibilite) selectedFragment = new DisponibiliteFragment();
+            else if (id == R.id.nav_file) selectedFragment = new FileAttenteFragment();
+            // Add more items...
+            if (selectedFragment != null) replaceFragment(selectedFragment);
+            return selectedFragment != null;
         });
+    }
 
-        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) == null) {
-            Log.d(TAG,"Setting initial fragment (EtablissementFragment)");
-            if(bottomNavigationView.getMenu().findItem(R.id.nav_etablissement) != null) {
-                bottomNavigationView.setSelectedItemId(R.id.nav_etablissement);
-            } else {
-                Log.e(TAG,"Default menu item R.id.nav_etablissement not found!");
-            }
+
+    private void setupNavigationListenerPatient() {
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            Fragment selectedFragment = null;
+            if (id == R.id.nav_book_appointment) selectedFragment = new PatientEstablishmentListFragment();
+            else if (id == R.id.nav_my_appointments) selectedFragment = new PatientAppointmentsFragment();
+            // Add more items...
+            if (selectedFragment != null) replaceFragment(selectedFragment);
+            return selectedFragment != null;
+        });
+    }
+
+    private void loadFallbackFragment() {
+        Log.w(TAG, "Loading fallback fragment due to missing initial item ID.");
+        Fragment fallbackFragment;
+        if ("patient".equals(currentUserRole)) {
+            fallbackFragment = new PatientEstablishmentListFragment();
+        } else if ("professional".equals(currentUserRole)) {
+            fallbackFragment = new EtablissementFragment();
+        } else {
+            fallbackFragment = new Fragment();
         }
+        replaceFragment(fallbackFragment);
     }
 
     private void replaceFragment(Fragment fragment) {
-        if (fragmentContainer == null || fragment == null) {
-            Log.e(TAG,"Cannot replace fragment - container or fragment is null!");
+        if (fragmentContainer == null || fragment == null) return;
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        if (currentFragment != null && currentFragment.getClass().equals(fragment.getClass())) {
+            Log.d(TAG, "Fragment already displayed: " + fragment.getClass().getSimpleName());
             return;
         }
-        FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment);
-        transaction.commit();
+        transaction.replace(R.id.fragment_container, fragment, fragment.getClass().getSimpleName());
+        transaction.commitAllowingStateLoss();
         Log.d(TAG,"Replacing fragment with: " + fragment.getClass().getSimpleName());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_options_menu, menu); // Ensure R.menu.main_options_menu exists
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        final int itemId = item.getItemId();
+        if (itemId == R.id.action_logout) { // Ensure R.id.action_logout exists in the menu
+            Log.d(TAG, "Logout selected.");
+            mAuth.signOut();
+            redirectToSignIn();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
