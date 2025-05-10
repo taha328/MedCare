@@ -14,5 +14,9 @@
         android:enabled="true"
         android:icon="@drawable/ic_event"
         android:title="Mes RDV" />
+    <item
+        android:id="@+id/nav_chatbot"
+        android:enabled="true"
+        android:title="Assistant"/>
 
 </menu>

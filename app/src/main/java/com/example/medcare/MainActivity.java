@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.example.medcare.admin.AdminDashboardActivity;
 import com.example.medcare.admin.PendingVerificationActivity;
 import com.example.medcare.auth.SignInActivity;
+import com.example.medcare.ui.ChatbotFragment;
 import com.example.medcare.ui.PatientAppointmentsFragment;
 import com.example.medcare.ui.PatientEstablishmentListFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -205,9 +206,13 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             Fragment selectedFragment = null;
-            if (id == R.id.nav_book_appointment) selectedFragment = new PatientEstablishmentListFragment();
-            else if (id == R.id.nav_my_appointments) selectedFragment = new PatientAppointmentsFragment();
-            // Add more items...
+
+            if (id == R.id.nav_book_appointment)
+                selectedFragment = new PatientEstablishmentListFragment();
+            else if (id == R.id.nav_my_appointments)
+                selectedFragment = new PatientAppointmentsFragment();
+            else if (id == R.id.nav_chatbot) selectedFragment = new ChatbotFragment(); // 🚀 Chatbot Fragment handler
+
             if (selectedFragment != null) replaceFragment(selectedFragment);
             return selectedFragment != null;
         });

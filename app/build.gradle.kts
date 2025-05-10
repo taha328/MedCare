@@ -86,7 +86,7 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-livedata:2.6.2")
     implementation (platform("com.google.firebase:firebase-bom:32.4.0"))
     implementation("com.google.firebase:firebase-firestore-ktx")
-
+    implementation ("com.squareup.okhttp3:okhttp:4.10.0")
 // You'll also likely need Authentication
     implementation("com.google.firebase:firebase-auth-ktx")
 
